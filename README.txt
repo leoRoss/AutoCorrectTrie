@@ -1,8 +1,9 @@
 AUTO-CORRECT SUGGESTOR --- IMPLEMENTED IN A TREE DICTIONARY
 
+
 WHAT?
 
-Store (word, frequency) pairs in a Trie:
+The Dictionary Trie stores (word, frequency) pairs in a Trie:
 
                  ''  (Root node = empty string)
                /    \
@@ -14,16 +15,18 @@ Store (word, frequency) pairs in a Trie:
                      \
                       l ('hill', 2)
 
-Very rapidly finds all words in the tree within a specified edit distance of a query
-Distance =  of removals, additions, or character changes need to manipulate the word into the query
+It can very rapidly find all the words in the tree within a specified edit distance of a query string.
+    Edit Distance = # of edits need to manipulate the query into a word.
+    1 Edit = removing/adding a single character from query string OR changing a single character in the string to another character.
+
 
 HOW?
 
-A query (such as 'hikl') is pushed down the tree
-As we decend the tree, we edit the start of the query to match the chosen path
+A query (such as 'hikl') is pushed down the tree.
+As we decend the Trie, we edit the query as needed to match the path of the Trie we are decending.
 Each traversal keeps track of the how many edits have been used so far
-When too many edits were used, that traversal ends
-If we reach the end of a query and arrive at suggestion, we suggest it!
+    If a traversal has used too many edits, that traversal ends
+    If we arrive at word and we have matched or edited ALL of the characters in the query, we suggest the word in the Trie!
 
 For example, if query = 'hikl', we could arrive at the "him"-node in multiple ways-
 
@@ -32,7 +35,10 @@ For example, if query = 'hikl', we could arrive at the "him"-node in multiple wa
       change 'k' for 'm' AND remove 'l'   ==>     query = 'him', edit used = 2 (Return "him" as a suggestion)
       remove 'k' AND change 'l' for 'm'   ==>     query = 'him', edit used = 2 (Return "him" as a suggestion)
 
-As we can see, some combinations of actions are equivalent. The findAll() method is implemented to reduce - not eliminate - these repetitions.Adding complexity to further reduce repeated work has only resulted in longer overall runtime.
+As we can see, some combinations of actions are equivalent. 
+The DictionaryTree.findAll() method is implemented to reduce - not eliminate - these repetitions.
+    Adding complexity to further reduce repeated work has only resulted in longer overall runtime.
+    Thus, it is necessary for the Trie to remove any duplicate suggestions.
 
 
 TO RUN:
