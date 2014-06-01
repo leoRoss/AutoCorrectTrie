@@ -42,7 +42,6 @@ The DictionaryTree.findAll() method is implemented to reduce - not eliminate - t
 
 
 TO RUN:
-```
+
       cd DictionaryTree
       python main.py
-```
