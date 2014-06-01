@@ -1,7 +1,8 @@
 #Leo Rossignac-Milon
+#Tester file for DictionaryTrie
 
 import csv, datetime
-from DictionaryTree import Trie
+from DictionaryTrie import Trie
 
 #Builds the tree using all recommended words in a csv file where each line is word,frequency
 def buildTrieFromFile(recommendedFilePath, trie):
