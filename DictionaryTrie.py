@@ -1,40 +1,45 @@
-#Leo Rossignac-Milon
-#Auto-Correct Suggestor Implemented in a Tree Dictionary - a Trie
+#!/usr/bin/env python
 
-#The Dictionary Trie stores (word, frequency) pairs in a Trie:
+r"""Auto-Correct Suggestor Implemented in a Tree Dictionary - a Trie
 
-#                  ''  (Root node = empty string)
-#               /    \
-#               h      a ('a', 17)
-#             /   \
-#  ('he',13) e     i ('Hi', 7)
-#                 /  \
-#      ('him',8) m    l
-#                      \
-#                       l ('hill', 2)
+The Dictionary Trie stores (word, frequency) pairs in a Trie:
 
-# It can very rapidly find all the words in the tree within a specified edit distance of a query string.
-#     Edit Distance = # of edits need to manipulate the query into a word.
-#     1 Edit = removing/adding a single character from query string OR changing a single character in the string to another character.
+                 ''  (Root node = empty string)
+              /    \
+              h      a ('a', 17)
+            /   \
+ ('he',13) e     i ('Hi', 7)
+                /  \
+     ('him',8) m    l
+                     \
+                      l ('hill', 2)
+
+It can very rapidly find all the words in the tree within a specified edit distance of a query string.
+    Edit Distance = # of edits need to manipulate the query into a word.
+    1 Edit = removing/adding a single character from query string OR changing a single character in the string to another character.
 
 
-# A query (such as 'hikl') is pushed down the tree.
-# As we decend the Trie, we edit the query as needed to match the path of the Trie we are decending.
-# Each traversal keeps track of the how many edits have been used so far
-#     If a traversal has used too many edits, that traversal ends
-#     If we arrive at word and we have matched or edited ALL of the characters in the query, we suggest the word in the Trie!
+A query (such as 'hikl') is pushed down the tree.
+As we decend the Trie, we edit the query as needed to match the path of the Trie we are decending.
+Each traversal keeps track of the how many edits have been used so far
+    If a traversal has used too many edits, that traversal ends
+    If we arrive at word and we have matched or edited ALL of the characters in the query, we suggest the word in the Trie.
 
-# For example, if query = 'hikl', we could arrive at the "him"-node in multiple ways-
+For example, if query = 'hikl', we could arrive at the "him"-node in multiple ways-
 
-#       add 'm' at query[2]                 ==>     query = 'himkl', edits used = 1
-#       change 'k' for 'm'                  ==>     query = 'himl', edits used = 1
-#       change 'k' for 'm' AND remove 'l'   ==>     query = 'him', edit used = 2 (Return "him" as a suggestion)
-#       remove 'k' AND change 'l' for 'm'   ==>     query = 'him', edit used = 2 (Return "him" as a suggestion)
+      add 'm' at query[2]                 ==>     query = 'himkl', edits used = 1
+      change 'k' for 'm'                  ==>     query = 'himl', edits used = 1
+      change 'k' for 'm' AND remove 'l'   ==>     query = 'him', edit used = 2 (Return "him" as a suggestion)
+      remove 'k' AND change 'l' for 'm'   ==>     query = 'him', edit used = 2 (Return "him" as a suggestion)
 
-# As we can see, some combinations of actions are equivalent. 
-# The DictionaryTree.findAll() method is implemented to reduce - not eliminate - these repetitions.
-#     Adding complexity to further reduce repeated work has only resulted in longer overall runtime.
-#     Thus, it is necessary for the Trie to remove any duplicate suggestions.
+As we can see, some combinations of actions are equivalent. 
+The DictionaryTree.findAll() method is implemented to reduce - not eliminate - these repetitions.
+    Adding complexity to further reduce repeated work has only resulted in longer overall runtime.
+    Thus, it is necessary for the Trie to remove any duplicate suggestions.
+"""
+
+__author__ = "Leo Rossignac-Milon"
+__email__ = "leo.milon@gmail.com"
 
 
 #ACTIONS
@@ -47,13 +52,14 @@ START=3
 
 
 #Dictionary Trie as described above
-class Trie
+class Trie:
+
     def __init__(self):
         self.root = LetterNode('')
 
     #Add a word and its freuquency to dictionary
-    def insert(self, recommendation, freq):
-        self.root.insert(recommendation, freq , 0)
+    def insert(self, word, freq):
+        self.root.insert(word, freq , 0)
 
     #Returns a sorted unique list of all words in the dictionary with a distance to query <= maxDistance
     def findAll(self, query, maxDistance):
@@ -65,7 +71,7 @@ class Trie
 #A node in a dictionary tree is a letter
 #Leaf nodes and some intermediary nodes represent Words
 #For speed, all letters are lowercased when inserting a word into a tree
-class LetterNode(object):
+class LetterNode:
 
     def __init__(self, char):
         self.pointers=[] #the list of children nodes (the next chars in a word from the frequency data)
@@ -75,25 +81,26 @@ class LetterNode(object):
     def charIs(self, c):
         return self.char==c
 
-    def insert(self, recommendation, freq, depth):
-        if (depth<len(recommendation)):
+    def insert(self, word, freq, depth):
+        if (depth<len(word)):
             #we need to continue down the tree
-            c = recommendation[depth].lower()
+            c = word[depth].lower()
             for next in self.pointers:
                 if (next.charIs(c)):
-                    return next.insert(recommendation, freq, depth+1)
+                    return next.insert(word, freq, depth+1)
             #we havent found the pointer, start a new branch in dictionary tree
             nextNode = LetterNode(c)
             self.pointers.append(nextNode)
-            return nextNode.insert(recommendation, freq, depth+1)
+            return nextNode.insert(word, freq, depth+1)
         #we've made it to our end node
         else:
-            self.word=Word(recommendation,freq)
-    
-    #Traverse the dictionary tree in 2-step legal manner - keeping track of how many edits we have performed on the query so far
-    #If a word is encountered at the end of a traversal, return it!
-    #Due to the fact that some combinations of actions are equivalent, this function will lead to few repeated recommendations
-    #Optimizing by further reducing equivalent paths has lead to increased complexity and poorer overall runtime
+            self.word=Word(word,freq)
+
+    # As we decend the Trie, we edit the query as needed to match the path of the Trie we are decending.
+    # Each traversal keeps track of the how many edits have been used so far
+    #     If a traversal has used too many edits, that traversal ends
+    #     If we arrive at word and we have matched or edited ALL of the characters in the query, we suggest the word in the Trie.
+    #Due to the fact that some combinations of actions are equivalent, this function will lead to few repeated recommendations (which are removed later on)
     def recommend(self, query, movesLeft, lastAction):
         suggestions = []
         length = len(query)
@@ -146,7 +153,8 @@ class LetterNode(object):
 
 
 #A word suggestion (with real capitalization) to be held by a node in the dictionary
-class Word(object):
+class Word:
+
     def __init__(self, word, freq):
         self.word=word #recomendation
         self.freq=freq #frequency
